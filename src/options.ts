@@ -108,6 +108,7 @@ export const includeGetSet = function () {
   this.setTooltipTemplate = function (pVal) { this.vTooltipTemplate = pVal; };
   this.setMinDate = function (pVal) { this.vMinDate = pVal; };
   this.setMaxDate = function (pVal) { this.vMaxDate = pVal; };
+  this.setEnforceMinMaxDate = function (pVal) { this.vEnforceMinMaxDate = pVal; };
   this.addLang = function (pLang, pVals) {
     if (!this.vLangs[pLang]) {
       this.vLangs[pLang] = new Object();

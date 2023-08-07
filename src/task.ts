@@ -431,7 +431,13 @@ export const createTaskInfo = function (pTask, templateStrOrFn = null) {
         if (!lang) {
           lang = key
         }
-        const val = allData[key];
+        // [XAM]-S Applied date time format in custom tooltip
+        // const val = allData[key];
+        let val = allData[key];
+        if (val && (key === 'pStart' || key === 'pEnd' || key === 'pPlanStart' || key === 'pPlanEnd')) {
+          val = formatDateStr(val, this.vDateTaskDisplayFormat, this.vLangs[this.vLang]);
+        }
+        // [XAM]-E Applied date time format in custom tooltip
 
         template = template.replace(`{{${key}}}`, val);
         if (lang) {

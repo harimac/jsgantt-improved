@@ -148,6 +148,7 @@ export const GanttChart = function (pDiv, pFormat) {
   this.vTooltipTemplate = null;
   this.vMinDate = null;
   this.vMaxDate = null;
+  this.vEnforceMinMaxDate = false;
   this.includeGetSet = includeGetSet.bind(this);
   this.includeGetSet();
 
@@ -192,12 +193,12 @@ export const GanttChart = function (pDiv, pFormat) {
     this.setListBody(vTmpDiv);
     let vTmpTab = newNode(vTmpDiv, "table", null, "gtasktableh");
     let vTmpTBody = newNode(vTmpTab, "tbody");
-    let vTmpRow = newNode(vTmpTBody, "tr");
+    let vTmpRow = newNode(vTmpTBody, "tr", null, 'gtasktableheader'); // [XAM] Modified header style
     newNode(vTmpRow, "td", null, "gtasklist", "\u00A0");
     let vTmpCell = newNode(vTmpRow, "td", null, "gspanning gtaskname", null, null, null, null, this.getColumnOrder().length + 1);
     vTmpCell.appendChild(this.drawSelector("top"));
 
-    vTmpRow = newNode(vTmpTBody, "tr");
+    vTmpRow = newNode(vTmpTBody, "tr", null, 'gtasktableheader'); // [XAM] Modified header style
     newNode(vTmpRow, "td", null, "gtasklist", "\u00A0");
     newNode(vTmpRow, "td", null, "gtaskname", "\u00A0");
 
@@ -314,7 +315,7 @@ export const GanttChart = function (pDiv, pFormat) {
       vTmpCell.appendChild(vOutput);
     }
     // DRAW the date format selector at bottom left.
-    let vTmpRow = newNode(vTmpContentTBody, "tr");
+    let vTmpRow = newNode(vTmpContentTBody, "tr", null, 'gtasktableheader'); // [XAM] Modified header style
     newNode(vTmpRow, "td", null, "gtasklist", "\u00A0");
     let vTmpCell = newNode(vTmpRow, "td", null, "gspanning gtaskname");
     vTmpCell.appendChild(this.drawSelector("bottom"));
@@ -348,7 +349,7 @@ export const GanttChart = function (pDiv, pFormat) {
     this.setChartHead(vTmpDiv);
     let vTmpTab = newNode(vTmpDiv, "table", this.vDivId + "chartTableh", "gcharttableh");
     let vTmpTBody = newNode(vTmpTab, "tbody");
-    let vTmpRow = newNode(vTmpTBody, "tr");
+    let vTmpRow = newNode(vTmpTBody, "tr", null, 'gcharttableheader'); // [XAM] Modified header style
 
     let vTmpDate = new Date();
     vTmpDate.setFullYear(vMinDate.getFullYear(), vMinDate.getMonth(), vMinDate.getDate());
@@ -406,7 +407,7 @@ export const GanttChart = function (pDiv, pFormat) {
       }
     }
 
-    vTmpRow = newNode(vTmpTBody, "tr", null, "footerdays");
+    vTmpRow = newNode(vTmpTBody, "tr", null, "footerdays gcharttableheader"); // [XAM] Modified header style
 
     // Minor Date header and Cell Rows
     vTmpDate.setFullYear(vMinDate.getFullYear(), vMinDate.getMonth(), vMinDate.getDate()); // , vMinDate.getHours()
@@ -489,7 +490,7 @@ export const GanttChart = function (pDiv, pFormat) {
 
     if (this.vUseSingleCell !== 0 && this.vUseSingleCell < vNumCols * vNumRows) vSingleCell = true;
 
-    newNode(vTmpDiv, "div", null, "rhscrpad", null, null, vTaskLeftPx + 1);
+    newNode(vTmpDiv, "div", null, "rhscrpad", null, vTaskLeftPx + 1); // [XAM] Fixed layout bug
 
     vTmpDiv = newNode(vRightHeader, "div", null, "glabelfooter");
 
@@ -507,7 +508,7 @@ export const GanttChart = function (pDiv, pFormat) {
     this.setChartBody(vTmpDiv);
     const vTmpTab = newNode(vTmpDiv, "table", this.vDivId + "chartTable", "gcharttable", null, vTaskLeftPx);
     this.setChartTable(vTmpTab);
-    newNode(vTmpDiv, "div", null, "rhscrpad", null, null, vTaskLeftPx + 1);
+    newNode(vTmpDiv, "div", null, "rhscrpad", null, vTaskLeftPx + 1); // [XAM] Fixed layout bug
     const vTmpTBody = newNode(vTmpTab, "tbody");
     const vTmpTFoot = newNode(vTmpTab, "tfoot");
 
@@ -782,8 +783,8 @@ export const GanttChart = function (pDiv, pFormat) {
     this.vProcessNeeded = false;
 
     // get overall min/max dates plus padding
-    vMinDate = getMinDate(this.vTaskList, this.vFormat, this.getMinDate() && coerceDate(this.getMinDate()));
-    vMaxDate = getMaxDate(this.vTaskList, this.vFormat, this.getMaxDate() && coerceDate(this.getMaxDate()));
+    vMinDate = getMinDate(this.vEnforceMinMaxDate ? [] : this.vTaskList, this.vFormat, this.getMinDate() && coerceDate(this.getMinDate()));
+    vMaxDate = getMaxDate(this.vEnforceMinMaxDate ? [] : this.vTaskList, this.vFormat, this.getMaxDate() && coerceDate(this.getMaxDate()));
 
     // Calculate chart width variables.
     if (this.vFormat == "day") vColWidth = this.vDayColWidth;

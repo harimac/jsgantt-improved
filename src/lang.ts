@@ -977,17 +977,17 @@ const ja = {
   'hours': '時間',
   'days': '日間',
   'weeks': '週間',
-  'months': '月間',
+  'months': 'ヶ月', // [XAM] Modified localization
   'quarters': '四半期',
   'hr': '時',
   'dy': '日',
   'wk': '週',
   'mth': '月',
-  'qtr': '四',
+  'qtr': 'Ｑ', // [XAM] Modified localization
   'hrs': '時間',
   'dys': '日間',
   'wks': '週間',
-  'mths': '月間',
+  'mths': 'ヶ月', // [XAM] Modified localization
   'qtrs': '四半期',
   'res': 'リソース',
   'dur': '期間',
@@ -1032,13 +1032,13 @@ const ja = {
   'thursday': '木曜日',
   'friday': '金曜日',
   'saturday': '土曜日',
-  'sun': '日',
-  'mon': '月',
-  'tue': '火',
-  'wed': '水',
-  'thu': '木',
-  'fri': '金',
-  'sat': '土',
+  'sun': '(日)', // [XAM] Modified localization
+  'mon': '(月)', // [XAM] Modified localization
+  'tue': '(火)', // [XAM] Modified localization
+  'wed': '(水)', // [XAM] Modified localization
+  'thu': '(木)', // [XAM] Modified localization
+  'fri': '(金)', // [XAM] Modified localization
+  'sat': '(土)', // [XAM] Modified localization
   'tooltipLoading': 'ローディング中...'
 }
 

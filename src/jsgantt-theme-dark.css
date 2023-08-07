@@ -1,0 +1,14 @@
+@media (prefers-color-scheme: dark) {
+  :root {
+    --jsgntt-main-text-color: #fff;
+    --jsgntt-main-background-color: #181818;
+    --jsgntt-main-alter-background-color: #282828;
+    --jsgntt-main-border-color: #555;
+    --jsgntt-hover-row-background-color: #1c90be;
+    --jsgntt-hover-row-border-color: #187aa1;
+    --jsgntt-selected-row-background-color: #347ec4;
+    --jsgntt-selected-row-border-color: #2c6daa;
+    --jsgntt-header-background-color: #393991;
+    --jsgntt-header-background-color-hover: #5252c0;
+}
+}

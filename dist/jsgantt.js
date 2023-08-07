@@ -142,6 +142,7 @@ exports.GanttChart = function (pDiv, pFormat) {
     this.vTooltipTemplate = null;
     this.vMinDate = null;
     this.vMaxDate = null;
+    this.vEnforceMinMaxDate = false;
     this.includeGetSet = options_1.includeGetSet.bind(this);
     this.includeGetSet();
     this.mouseOver = events_1.mouseOver;
@@ -180,11 +181,11 @@ exports.GanttChart = function (pDiv, pFormat) {
         this.setListBody(vTmpDiv);
         var vTmpTab = draw_utils_1.newNode(vTmpDiv, "table", null, "gtasktableh");
         var vTmpTBody = draw_utils_1.newNode(vTmpTab, "tbody");
-        var vTmpRow = draw_utils_1.newNode(vTmpTBody, "tr");
+        var vTmpRow = draw_utils_1.newNode(vTmpTBody, "tr", null, 'gtasktableheader'); // [XAM] Modified header style
         draw_utils_1.newNode(vTmpRow, "td", null, "gtasklist", "\u00A0");
         var vTmpCell = draw_utils_1.newNode(vTmpRow, "td", null, "gspanning gtaskname", null, null, null, null, this.getColumnOrder().length + 1);
         vTmpCell.appendChild(this.drawSelector("top"));
-        vTmpRow = draw_utils_1.newNode(vTmpTBody, "tr");
+        vTmpRow = draw_utils_1.newNode(vTmpTBody, "tr", null, 'gtasktableheader'); // [XAM] Modified header style
         draw_utils_1.newNode(vTmpRow, "td", null, "gtasklist", "\u00A0");
         draw_utils_1.newNode(vTmpRow, "td", null, "gtaskname", "\u00A0");
         this.getColumnOrder().forEach(function (column) {
@@ -283,7 +284,7 @@ exports.GanttChart = function (pDiv, pFormat) {
             vTmpCell_2.appendChild(vOutput);
         }
         // DRAW the date format selector at bottom left.
-        var vTmpRow = draw_utils_1.newNode(vTmpContentTBody, "tr");
+        var vTmpRow = draw_utils_1.newNode(vTmpContentTBody, "tr", null, 'gtasktableheader'); // [XAM] Modified header style
         draw_utils_1.newNode(vTmpRow, "td", null, "gtasklist", "\u00A0");
         var vTmpCell = draw_utils_1.newNode(vTmpRow, "td", null, "gspanning gtaskname");
         vTmpCell.appendChild(this.drawSelector("bottom"));
@@ -313,7 +314,7 @@ exports.GanttChart = function (pDiv, pFormat) {
         this.setChartHead(vTmpDiv);
         var vTmpTab = draw_utils_1.newNode(vTmpDiv, "table", this.vDivId + "chartTableh", "gcharttableh");
         var vTmpTBody = draw_utils_1.newNode(vTmpTab, "tbody");
-        var vTmpRow = draw_utils_1.newNode(vTmpTBody, "tr");
+        var vTmpRow = draw_utils_1.newNode(vTmpTBody, "tr", null, 'gcharttableheader'); // [XAM] Modified header style
         var vTmpDate = new Date();
         vTmpDate.setFullYear(vMinDate.getFullYear(), vMinDate.getMonth(), vMinDate.getDate());
         if (this.vFormat == "hour")
@@ -373,7 +374,7 @@ exports.GanttChart = function (pDiv, pFormat) {
                 vTmpDate.setDate(vTmpDate.getDate() + 1);
             }
         }
-        vTmpRow = draw_utils_1.newNode(vTmpTBody, "tr", null, "footerdays");
+        vTmpRow = draw_utils_1.newNode(vTmpTBody, "tr", null, "footerdays gcharttableheader"); // [XAM] Modified header style
         // Minor Date header and Cell Rows
         vTmpDate.setFullYear(vMinDate.getFullYear(), vMinDate.getMonth(), vMinDate.getDate()); // , vMinDate.getHours()
         if (this.vFormat == "hour")
@@ -450,7 +451,7 @@ exports.GanttChart = function (pDiv, pFormat) {
         var vSingleCell = false;
         if (this.vUseSingleCell !== 0 && this.vUseSingleCell < vNumCols * vNumRows)
             vSingleCell = true;
-        draw_utils_1.newNode(vTmpDiv, "div", null, "rhscrpad", null, null, vTaskLeftPx + 1);
+        draw_utils_1.newNode(vTmpDiv, "div", null, "rhscrpad", null, vTaskLeftPx + 1); // [XAM] Fixed layout bug
         vTmpDiv = draw_utils_1.newNode(vRightHeader, "div", null, "glabelfooter");
         return { gChartLbl: gChartLbl, vTaskLeftPx: vTaskLeftPx, vSingleCell: vSingleCell, vDateRow: vDateRow, vRightHeader: vRightHeader, vNumCols: vNumCols };
     };
@@ -465,7 +466,7 @@ exports.GanttChart = function (pDiv, pFormat) {
         this.setChartBody(vTmpDiv);
         var vTmpTab = draw_utils_1.newNode(vTmpDiv, "table", this.vDivId + "chartTable", "gcharttable", null, vTaskLeftPx);
         this.setChartTable(vTmpTab);
-        draw_utils_1.newNode(vTmpDiv, "div", null, "rhscrpad", null, null, vTaskLeftPx + 1);
+        draw_utils_1.newNode(vTmpDiv, "div", null, "rhscrpad", null, vTaskLeftPx + 1); // [XAM] Fixed layout bug
         var vTmpTBody = draw_utils_1.newNode(vTmpTab, "tbody");
         var vTmpTFoot = draw_utils_1.newNode(vTmpTab, "tfoot");
         events_1.syncScroll([vTmpContentTabWrapper, vTmpDiv], "scrollTop");
@@ -705,8 +706,8 @@ exports.GanttChart = function (pDiv, pFormat) {
             task_1.processRows(this.vTaskList, 0, -1, 1, 1, this.getUseSort(), this.vDebug);
         this.vProcessNeeded = false;
         // get overall min/max dates plus padding
-        vMinDate = date_utils_1.getMinDate(this.vTaskList, this.vFormat, this.getMinDate() && date_utils_1.coerceDate(this.getMinDate()));
-        vMaxDate = date_utils_1.getMaxDate(this.vTaskList, this.vFormat, this.getMaxDate() && date_utils_1.coerceDate(this.getMaxDate()));
+        vMinDate = date_utils_1.getMinDate(this.vEnforceMinMaxDate ? [] : this.vTaskList, this.vFormat, this.getMinDate() && date_utils_1.coerceDate(this.getMinDate()));
+        vMaxDate = date_utils_1.getMaxDate(this.vEnforceMinMaxDate ? [] : this.vTaskList, this.vFormat, this.getMaxDate() && date_utils_1.coerceDate(this.getMaxDate()));
         // Calculate chart width variables.
         if (this.vFormat == "day")
             vColWidth = this.vDayColWidth;
@@ -2753,17 +2754,17 @@ var ja = {
     'hours': '時間',
     'days': '日間',
     'weeks': '週間',
-    'months': '月間',
+    'months': 'ヶ月',
     'quarters': '四半期',
     'hr': '時',
     'dy': '日',
     'wk': '週',
     'mth': '月',
-    'qtr': '四',
+    'qtr': 'Ｑ',
     'hrs': '時間',
     'dys': '日間',
     'wks': '週間',
-    'mths': '月間',
+    'mths': 'ヶ月',
     'qtrs': '四半期',
     'res': 'リソース',
     'dur': '期間',
@@ -2808,13 +2809,13 @@ var ja = {
     'thursday': '木曜日',
     'friday': '金曜日',
     'saturday': '土曜日',
-    'sun': '日',
-    'mon': '月',
-    'tue': '火',
-    'wed': '水',
-    'thu': '木',
-    'fri': '金',
-    'sat': '土',
+    'sun': '(日)',
+    'mon': '(月)',
+    'tue': '(火)',
+    'wed': '(水)',
+    'thu': '(木)',
+    'fri': '(金)',
+    'sat': '(土)',
     'tooltipLoading': 'ローディング中...'
 };
 exports.ja = ja;
@@ -3528,6 +3529,7 @@ exports.includeGetSet = function () {
     this.setTooltipTemplate = function (pVal) { this.vTooltipTemplate = pVal; };
     this.setMinDate = function (pVal) { this.vMinDate = pVal; };
     this.setMaxDate = function (pVal) { this.vMaxDate = pVal; };
+    this.setEnforceMinMaxDate = function (pVal) { this.vEnforceMinMaxDate = pVal; };
     this.addLang = function (pLang, pVals) {
         if (!this.vLangs[pLang]) {
             this.vLangs[pLang] = new Object();
@@ -4127,7 +4129,13 @@ exports.createTaskInfo = function (pTask, templateStrOrFn) {
                 if (!lang) {
                     lang = key;
                 }
+                // [XAM]-S Applied date time format in custom tooltip
+                // const val = allData[key];
                 var val = allData_1[key];
+                if (val && (key === 'pStart' || key === 'pEnd' || key === 'pPlanStart' || key === 'pPlanEnd')) {
+                    val = date_utils_1.formatDateStr(val, _this.vDateTaskDisplayFormat, _this.vLangs[_this.vLang]);
+                }
+                // [XAM]-E Applied date time format in custom tooltip
                 template = template.replace("{{" + key + "}}", val);
                 if (lang) {
                     template = template.replace("{{Lang:" + key + "}}", lang);
@@ -4372,9 +4380,15 @@ exports.getIsoWeek = exports.parseDateFormatStr = exports.formatDateStr = export
  */
 exports.getMinDate = function (pList, pFormat, pMinDate) {
     var vDate = new Date();
+    // [XAM]-S Enable the min date logic even if no tasks
+    //if (pList.length <= 0) return pMinDate || vDate;
+    //
+    //vDate.setTime((pMinDate && pMinDate.getTime()) || pList[0].getStart().getTime());
     if (pList.length <= 0)
-        return pMinDate || vDate;
-    vDate.setTime((pMinDate && pMinDate.getTime()) || pList[0].getStart().getTime());
+        vDate.setTime(pMinDate && pMinDate.getTime());
+    else
+        vDate.setTime((pMinDate && pMinDate.getTime()) || pList[0].getStart().getTime());
+    // [XAM]-E Enable the min date logic even if no tasks
     // Parse all Task Start dates to find min
     for (var i = 0; i < pList.length; i++) {
         if (pList[i].getStart().getTime() < vDate.getTime())
@@ -4422,9 +4436,15 @@ exports.getMinDate = function (pList, pFormat, pMinDate) {
 };
 exports.getMaxDate = function (pList, pFormat, pMaxDate) {
     var vDate = new Date();
+    // [XAM]-S Enable the max date logic even if no tasks
+    // if (pList.length <= 0) return pMaxDate || vDate;
+    //
+    // vDate.setTime((pMaxDate && pMaxDate.getTime()) || pList[0].getEnd().getTime());
     if (pList.length <= 0)
-        return pMaxDate || vDate;
-    vDate.setTime((pMaxDate && pMaxDate.getTime()) || pList[0].getEnd().getTime());
+        vDate.setTime(pMaxDate && pMaxDate.getTime());
+    else
+        vDate.setTime((pMaxDate && pMaxDate.getTime()) || pList[0].getEnd().getTime());
+    // [XAM]-S Enable the max date logic even if no tasks
     // Parse all Task End dates to find max
     for (var i = 0; i < pList.length; i++) {
         if (pList[i].getEnd().getTime() > vDate.getTime())
