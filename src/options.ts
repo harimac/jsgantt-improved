@@ -108,7 +108,7 @@ export const includeGetSet = function () {
   this.setTooltipTemplate = function (pVal) { this.vTooltipTemplate = pVal; };
   this.setMinDate = function (pVal) { this.vMinDate = pVal; };
   this.setMaxDate = function (pVal) { this.vMaxDate = pVal; };
-  this.setEnforceMinMaxDate = function (pVal) { this.vEnforceMinMaxDate = pVal; };
+  this.setEnforceMinMaxDate = function (pVal) { this.vEnforceMinMaxDate = pVal; }; // [XAM] Enable the min or max date logic even if no tasks
   this.addLang = function (pLang, pVals) {
     if (!this.vLangs[pLang]) {
       this.vLangs[pLang] = new Object();
@@ -197,6 +197,7 @@ export const includeGetSet = function () {
   this.getTimer = function () { return this.vTimer; };
   this.getMinDate = function () { return this.vMinDate; };
   this.getMaxDate = function () { return this.vMaxDate; };
+  this.getEnforceMinMaxDate = function () { return this.vEnforceMinMaxDate; }; // [XAM] Enable the min or max date logic even if no tasks
   this.getTooltipDelay = function () { return this.vTooltipDelay; };
   this.getList = function () { return this.vTaskList; };
 

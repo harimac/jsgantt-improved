@@ -106,7 +106,7 @@ export const draw_header = function (column, i, vTmpRow, vTaskList, vEditable, v
       const header = vAdditionalHeaders[key];
       const css = header.class ? header.class : `gadditional-${key}`;
       const data = vTaskList[i].getDataObject();
-      vTmpCell = newNode(vTmpRow, 'td', null, `gadditional ${css}`);
+      vTmpCell = newNode(vTmpRow, 'td', null, `gadditional ${css}`, null, null, null, null, null, ["title", data ? data[key] : '']); // [XAM] Added tooltip for cell contents
       vTmpDiv = newNode(vTmpCell, 'div', null, null, data ? data[key] : '');
       addListenerClickCell(vTmpCell, vEvents, vTaskList[i], `additional_${key}`);
       // const callback = (task, e) => task.setCost(e.target.value);

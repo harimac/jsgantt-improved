@@ -6,6 +6,8 @@
   "scripts": {
     "start": "http-server",
     "build": "tsc",
+    "build:rollup": "rollup --config",
+    "build:minifyCss": "cleancss -o dist/jsgantt.min.css dist/jsgantt.css",
     "watch:build": "onchange 'src/**' '*.*' -- npm run build",
     "watch": "onchange 'src/**' '*.ts' -- npm run dist",
     "watch:test": "onchange 'src/**/*.ts' '*.ts' 'e2e/**/*.ts' -- npm run test",
@@ -13,7 +15,7 @@
     "test-unit": "mocha -r ts-node/register test/**.ts",
     "webdriver": "./node_modules/protractor/bin/webdriver-manager update",
     "browserify": "browserify dist/index.js --standalone JSGantt > dist/jsgantt.js",
-    "dist": "npm run build && npm run browserify && cp src/*.css dist/ && echo 'DIST finished'",
+    "dist": "npm run build && npm run browserify && cp src/*.css dist/ && npm run build:rollup && npm run build:minifyCss && echo 'DIST finished'",
     "publishnpm": "npm run dist && npm publish",
     "demo-full": "npm run dist && npm run start",
     "e2e-prepare": "npm i -g webdriver-manager && webdriver-manager update && ./node_modules/protractor/node_modules/webdriver-manager/bin/webdriver-manager update"
@@ -30,6 +32,7 @@
   "homepage": "https://jsganttimproved.github.io/jsgantt-improved/docs/",
   "dependencies": {
     "@types/node": "^12.0.10",
+    "rollup-plugin-terser": "^7.0.2",
     "webdriver-manager": "^13.0.0"
   },
   "devDependencies": {

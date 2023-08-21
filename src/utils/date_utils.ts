@@ -2,62 +2,62 @@
 /**
  * DATES
  */
-export const getMinDate = function (pList, pFormat, pMinDate) {
+export const getMinDate = function (pList, pFormat, pMinDate, vEnforceMinMaxDate) { // [XAM] Enable force to set the min date even if no tasks
   let vDate = new Date();
-  // [XAM]-S Enable the min date logic even if no tasks
+  // [XAM]-S Enable force to set the min date even if no tasks
   //if (pList.length <= 0) return pMinDate || vDate;
   //
   //vDate.setTime((pMinDate && pMinDate.getTime()) || pList[0].getStart().getTime());
-  if (pList.length <= 0)
+  if (vEnforceMinMaxDate === true || !pList || pList.length <= 0)
     vDate.setTime(pMinDate && pMinDate.getTime());
   else
     vDate.setTime((pMinDate && pMinDate.getTime()) || pList[0].getStart().getTime());
-  // [XAM]-E Enable the min date logic even if no tasks
 
-  // Parse all Task Start dates to find min
-  for (let i = 0; i < pList.length; i++) {
-    if (pList[i].getStart().getTime() < vDate.getTime()) vDate.setTime(pList[i].getStart().getTime());
-    if (pList[i].getPlanStart() && pList[i].getPlanStart().getTime() < vDate.getTime()) vDate.setTime(pList[i].getPlanStart().getTime());
-  }
+  if (vEnforceMinMaxDate !== true) {
+    // Parse all Task Start dates to find min
+    for (let i = 0; i < pList.length; i++) {
+      if (pList[i].getStart().getTime() < vDate.getTime()) vDate.setTime(pList[i].getStart().getTime());
+      if (pList[i].getPlanStart() && pList[i].getPlanStart().getTime() < vDate.getTime()) vDate.setTime(pList[i].getPlanStart().getTime());
+    }
 
-  // Adjust min date to specific format boundaries (first of week or first of month)
-  if (pFormat == 'day') {
-    vDate.setDate(vDate.getDate() - 1);
-    while (vDate.getDay() % 7 != 1) vDate.setDate(vDate.getDate() - 1);
+    if (pFormat == 'day') {
+      vDate.setDate(vDate.getDate() - 1);
+      while (vDate.getDay() % 7 != 1) vDate.setDate(vDate.getDate() - 1);
+    }
+    else if (pFormat == 'week') {
+      vDate.setDate(vDate.getDate() - 1);
+      while (vDate.getDay() % 7 != 1) vDate.setDate(vDate.getDate() - 1);
+    }
+    else if (pFormat == 'month') {
+      vDate.setDate(vDate.getDate() - 15);
+      while (vDate.getDate() > 1) vDate.setDate(vDate.getDate() - 1);
+    }
+    else if (pFormat == 'quarter') {
+      vDate.setDate(vDate.getDate() - 31);
+      if (vDate.getMonth() == 0 || vDate.getMonth() == 1 || vDate.getMonth() == 2)
+        vDate.setFullYear(vDate.getFullYear(), 0, 1);
+      else if (vDate.getMonth() == 3 || vDate.getMonth() == 4 || vDate.getMonth() == 5)
+        vDate.setFullYear(vDate.getFullYear(), 3, 1);
+      else if (vDate.getMonth() == 6 || vDate.getMonth() == 7 || vDate.getMonth() == 8)
+        vDate.setFullYear(vDate.getFullYear(), 6, 1);
+      else if (vDate.getMonth() == 9 || vDate.getMonth() == 10 || vDate.getMonth() == 11)
+        vDate.setFullYear(vDate.getFullYear(), 9, 1);
+    }
+    else if (pFormat == 'hour') {
+      vDate.setHours(vDate.getHours() - 1);
+      while (vDate.getHours() % 6 != 0) vDate.setHours(vDate.getHours() - 1);
+    }
   }
-  else if (pFormat == 'week') {
-    vDate.setDate(vDate.getDate() - 1);
-    while (vDate.getDay() % 7 != 1) vDate.setDate(vDate.getDate() - 1);
-  }
-  else if (pFormat == 'month') {
-    vDate.setDate(vDate.getDate() - 15);
-    while (vDate.getDate() > 1) vDate.setDate(vDate.getDate() - 1);
-  }
-  else if (pFormat == 'quarter') {
-    vDate.setDate(vDate.getDate() - 31);
-    if (vDate.getMonth() == 0 || vDate.getMonth() == 1 || vDate.getMonth() == 2)
-      vDate.setFullYear(vDate.getFullYear(), 0, 1);
-    else if (vDate.getMonth() == 3 || vDate.getMonth() == 4 || vDate.getMonth() == 5)
-      vDate.setFullYear(vDate.getFullYear(), 3, 1);
-    else if (vDate.getMonth() == 6 || vDate.getMonth() == 7 || vDate.getMonth() == 8)
-      vDate.setFullYear(vDate.getFullYear(), 6, 1);
-    else if (vDate.getMonth() == 9 || vDate.getMonth() == 10 || vDate.getMonth() == 11)
-      vDate.setFullYear(vDate.getFullYear(), 9, 1);
-  }
-  else if (pFormat == 'hour') {
-    vDate.setHours(vDate.getHours() - 1);
-    while (vDate.getHours() % 6 != 0) vDate.setHours(vDate.getHours() - 1);
-  }
-
+  // [XAM]-E Enable force to set the min date even if no tasks
   if (pFormat == 'hour') vDate.setMinutes(0, 0);
   else vDate.setHours(0, 0, 0);
   return (vDate);
 };
 
-export const getMaxDate = function (pList, pFormat, pMaxDate) {
+export const getMaxDate = function (pList, pFormat, pMaxDate, vEnforceMinMaxDate) { // [XAM] Enable force to set the max date even if no tasks
   let vDate = new Date();
 
-  // [XAM]-S Enable the max date logic even if no tasks
+  // [XAM]-S Enable force to set the max date even if no tasks
   // if (pList.length <= 0) return pMaxDate || vDate;
   //
   // vDate.setTime((pMaxDate && pMaxDate.getTime()) || pList[0].getEnd().getTime());
@@ -65,47 +65,49 @@ export const getMaxDate = function (pList, pFormat, pMaxDate) {
     vDate.setTime(pMaxDate && pMaxDate.getTime());
   else
     vDate.setTime((pMaxDate && pMaxDate.getTime()) || pList[0].getEnd().getTime());
-  // [XAM]-S Enable the max date logic even if no tasks
 
-  // Parse all Task End dates to find max
-  for (let i = 0; i < pList.length; i++) {
-    if (pList[i].getEnd().getTime() > vDate.getTime()) vDate.setTime(pList[i].getEnd().getTime());
-    if (pList[i].getPlanEnd() && pList[i].getPlanEnd().getTime() > vDate.getTime()) vDate.setTime(pList[i].getPlanEnd().getTime());
-  }
+  if (vEnforceMinMaxDate !== true) {
+    // Parse all Task End dates to find max
+    for (let i = 0; i < pList.length; i++) {
+      if (pList[i].getEnd().getTime() > vDate.getTime()) vDate.setTime(pList[i].getEnd().getTime());
+      if (pList[i].getPlanEnd() && pList[i].getPlanEnd().getTime() > vDate.getTime()) vDate.setTime(pList[i].getPlanEnd().getTime());
+    }
 
-  // Adjust max date to specific format boundaries (end of week or end of month)
-  if (pFormat == 'day') {
-    vDate.setDate(vDate.getDate() + 1);
-    while (vDate.getDay() % 7 != 0) vDate.setDate(vDate.getDate() + 1);
-  }
-  else if (pFormat == 'week') {
-    //For weeks, what is the last logical boundary?
-    vDate.setDate(vDate.getDate() + 1);
+    // Adjust max date to specific format boundaries (end of week or end of month)
+    if (pFormat == 'day') {
+      vDate.setDate(vDate.getDate() + 1);
+      while (vDate.getDay() % 7 != 0) vDate.setDate(vDate.getDate() + 1);
+    }
+    else if (pFormat == 'week') {
+      //For weeks, what is the last logical boundary?
+      vDate.setDate(vDate.getDate() + 1);
 
-    while (vDate.getDay() % 7 != 0) vDate.setDate(vDate.getDate() + 1);
-  }
-  else if (pFormat == 'month') {
-    // Set to last day of current Month
-    while (vDate.getDate() > 1) vDate.setDate(vDate.getDate() + 1);
-    vDate.setDate(vDate.getDate() - 1);
-  }
-  else if (pFormat == 'quarter') {
-    // Set to last day of current Quarter
-    if (vDate.getMonth() == 0 || vDate.getMonth() == 1 || vDate.getMonth() == 2)
-      vDate.setFullYear(vDate.getFullYear(), 2, 31);
-    else if (vDate.getMonth() == 3 || vDate.getMonth() == 4 || vDate.getMonth() == 5)
-      vDate.setFullYear(vDate.getFullYear(), 5, 30);
-    else if (vDate.getMonth() == 6 || vDate.getMonth() == 7 || vDate.getMonth() == 8)
-      vDate.setFullYear(vDate.getFullYear(), 8, 30);
-    else if (vDate.getMonth() == 9 || vDate.getMonth() == 10 || vDate.getMonth() == 11)
-      vDate.setFullYear(vDate.getFullYear(), 11, 31);
-  }
-  else if (pFormat == 'hour') {
-    if (vDate.getHours() == 0) vDate.setDate(vDate.getDate() + 1);
-    vDate.setHours(vDate.getHours() + 1);
+      while (vDate.getDay() % 7 != 0) vDate.setDate(vDate.getDate() + 1);
+    }
+    else if (pFormat == 'month') {
+      // Set to last day of current Month
+      while (vDate.getDate() > 1) vDate.setDate(vDate.getDate() + 1);
+      vDate.setDate(vDate.getDate() - 1);
+    }
+    else if (pFormat == 'quarter') {
+      // Set to last day of current Quarter
+      if (vDate.getMonth() == 0 || vDate.getMonth() == 1 || vDate.getMonth() == 2)
+        vDate.setFullYear(vDate.getFullYear(), 2, 31);
+      else if (vDate.getMonth() == 3 || vDate.getMonth() == 4 || vDate.getMonth() == 5)
+        vDate.setFullYear(vDate.getFullYear(), 5, 30);
+      else if (vDate.getMonth() == 6 || vDate.getMonth() == 7 || vDate.getMonth() == 8)
+        vDate.setFullYear(vDate.getFullYear(), 8, 30);
+      else if (vDate.getMonth() == 9 || vDate.getMonth() == 10 || vDate.getMonth() == 11)
+        vDate.setFullYear(vDate.getFullYear(), 11, 31);
+    }
+    else if (pFormat == 'hour') {
+      if (vDate.getHours() == 0) vDate.setDate(vDate.getDate() + 1);
+      vDate.setHours(vDate.getHours() + 1);
 
-    while (vDate.getHours() % 6 != 5) vDate.setHours(vDate.getHours() + 1);
+      while (vDate.getHours() % 6 != 5) vDate.setHours(vDate.getHours() + 1);
+    }
   }
+  // [XAM]-S Enable force to set the max date even if no tasks
   return (vDate);
 };
 

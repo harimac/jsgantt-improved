@@ -148,7 +148,7 @@ export const GanttChart = function (pDiv, pFormat) {
   this.vTooltipTemplate = null;
   this.vMinDate = null;
   this.vMaxDate = null;
-  this.vEnforceMinMaxDate = false;
+  this.vEnforceMinMaxDate = false;  // [XAM] Enable force to set the min or max date even if no tasks
   this.includeGetSet = includeGetSet.bind(this);
   this.includeGetSet();
 
@@ -530,8 +530,13 @@ export const GanttChart = function (pDiv, pFormat) {
       let curTaskEnd = this.vTaskList[i].getEnd() ? this.vTaskList[i].getEnd() : this.vTaskList[i].getPlanEnd();
 
       const vTaskLeftPx = getOffset(vMinDate, curTaskStart, vColWidth, this.vFormat, this.vShowWeekends);
-      const vTaskRightPx = getOffset(curTaskStart, curTaskEnd, vColWidth, this.vFormat, this.vShowWeekends);
-
+      // [XAM]-S Enable force to set task range if its end is over max date.
+      let vTaskRightPx = getOffset(curTaskStart, curTaskEnd, vColWidth, this.vFormat, this.vShowWeekends);
+      const vMaxRightPx = getOffset(curTaskStart, vMaxDate, vColWidth, this.vFormat, this.vShowWeekends);
+      if (this.vEnforceMinMaxDate === true) {
+        vTaskRightPx = Math.min(vTaskRightPx, vMaxRightPx);
+      }
+      // [XAM]-E Enable force to set task range if its end is over max date.
       let curTaskPlanStart, curTaskPlanEnd;
 
       curTaskPlanStart = this.vTaskList[i].getPlanStart();
@@ -541,6 +546,12 @@ export const GanttChart = function (pDiv, pFormat) {
       if (curTaskPlanStart && curTaskPlanEnd) {
         vTaskPlanLeftPx = getOffset(vMinDate, curTaskPlanStart, vColWidth, this.vFormat, this.vShowWeekends);
         vTaskPlanRightPx = getOffset(curTaskPlanStart, curTaskPlanEnd, vColWidth, this.vFormat, this.vShowWeekends);
+        // [XAM]-S Enable force to set task range if its end is over max date.
+        const vMaxPlanRightPx = getOffset(curTaskPlanStart, vMaxDate, vColWidth, this.vFormat, this.vShowWeekends);
+        if (this.vEnforceMinMaxDate === true) {
+          vTaskPlanRightPx = Math.min(vTaskPlanRightPx, vMaxPlanRightPx);
+        }
+        // [XAM]-E Enable force to set task range if its end is over max date.
       }
 
       const vID = this.vTaskList[i].getID();
@@ -713,6 +724,18 @@ export const GanttChart = function (pDiv, pFormat) {
         addTooltipListeners(this, this.vTaskList[i].getPlanTaskDiv(), vTmpDiv2, callback);
       }
     }
+    // [XAM]-S Render the chart even if no data
+    if (this.vTaskList.length == 0) {
+      //let totalColumns = this.getColumnOrder().filter((column) => this[column] == 1 || column === "vAdditionalHeaders").length;
+      //let vTmpRow = newNode(vTmpTBody, "tr", this.vDivId + "childrow_" + vID, "gmileitem gmile" + this.vFormat, null, null, null, this.vTaskList[i].getVisible() == 0 ? "none" : null);
+      let vTmpRow = newNode(vTmpTBody, "tr", this.vDivId + "childrow_", "glineitem gitem");
+      // this.vTaskList[i].setListChildRow(vTmpRow);
+      let vTmpCell = newNode(vTmpRow, "td", null, null, null, "100%", null, null, vNumCols);
+      let vOutput = document.createDocumentFragment();
+      newNode(vOutput, "div", null, "gtasknolist-label", "<span>&nbsp;</span>");
+      vTmpCell.appendChild(vOutput);
+    }
+    // [XAM]-E Render the chart even if no data
 
     // Include the footer with the days/week/month...
     if (vSingleCell) {
@@ -783,8 +806,8 @@ export const GanttChart = function (pDiv, pFormat) {
     this.vProcessNeeded = false;
 
     // get overall min/max dates plus padding
-    vMinDate = getMinDate(this.vEnforceMinMaxDate ? [] : this.vTaskList, this.vFormat, this.getMinDate() && coerceDate(this.getMinDate()));
-    vMaxDate = getMaxDate(this.vEnforceMinMaxDate ? [] : this.vTaskList, this.vFormat, this.getMaxDate() && coerceDate(this.getMaxDate()));
+    vMinDate = getMinDate(this.vTaskList, this.vFormat, this.getMinDate() && coerceDate(this.getMinDate()), this.vEnforceMinMaxDate); // [XAM] Enable force to set the min date even if no tasks
+    vMaxDate = getMaxDate(this.vTaskList, this.vFormat, this.getMaxDate() && coerceDate(this.getMaxDate()), this.vEnforceMinMaxDate); // [XAM] Enable force to set the max date even if no tasks
 
     // Calculate chart width variables.
     if (this.vFormat == "day") vColWidth = this.vDayColWidth;

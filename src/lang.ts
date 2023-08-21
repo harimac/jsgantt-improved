@@ -999,7 +999,7 @@ const ja = {
   'planenddate': '予定期日',
   'cost': 'コスト',
   'moreinfo': '詳細',
-  'nodata': 'No tasks found',
+  'nodata': 'タスクはありません', // [XAM] Modified localization
   'notes': 'ノート',
   'january': '1月',
   'february': '2月',
