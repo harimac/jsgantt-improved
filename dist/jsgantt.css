@@ -1,10 +1,10 @@
 /* Sample CSS for jsGanttImproved v1.8.0 */
-// [XAM] Update history
-// - Enable dark theme
-// - disable custom font in gantt
-// - disable custom font size in gantt
-// - enable header background color
-
+/* [XAM] Update history
+ * - Enable dark theme
+ * - disable custom font in gantt
+ * - disable custom font size in gantt
+ * - enable header background color
+*/
 :root {
   --jsgntt-main-text-color: #000;
   --jsgntt-main-background-color: #fff;
@@ -16,6 +16,8 @@
   --jsgntt-selected-row-border-color: #6eb8ff;
   --jsgntt-header-background-color: #f9f9f9;
   --jsgntt-header-background-color-hover: #fcfcfc;
+  --jsgntt-cell-background-color: #fff;
+  --jsgntt-cell-background-color-alt: #fcfcfc;
 }
 
 div.gantt {
@@ -78,9 +80,36 @@ div.gantt {
   background-color: var(--jsgntt-header-background-color);
 }
 
+table.gtasktable tr:nth-child(odd),
+table.gcharttable tr:nth-child(odd) {
+	background-color: var(--jsgntt-cell-background-color);
+}
+table.gtasktable tr:nth-child(even),
+table.gcharttable tr:nth-child(even) {
+	background-color: var(--jsgntt-cell-background-color-alt);
+}
+
 .gtasktableheader  td:hover,
-.gcharttableheader  td:hover {
+.gcharttableheader  td:hover/*,
+table.gtasktable tr.glineitem:nth-child(odd) td:hover,
+table.gtasktable tr.glineitem:nth-child(even) td:hover*/ {
   background-color: var(--jsgntt-header-background-color-hover);
+}
+
+.gtasktableheader  td {
+  padding: .2em .5em;
+  /* position: relative; */
+}
+.gtasktableheader .header-resize {
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -0.25em;
+  width: 0.5em;
+  background: transparent;
+  z-index: 2;
+  cursor: ew-resize;
 }
 
 .gtaskheading,
@@ -276,12 +305,26 @@ span.gfoldercollapse {
 .glineitem {
   background-color: var(--jsgntt-main-background-color);
 }
+table.gtasktable tr.glineitem.gselectedrow,
+table.gcharttable tr.glineitem.gselectedrow {
+  background-color: var(--jsgntt-selected-row-background-color);
+  border-color: var(--jsgntt-selected-row-border-color);
+}
+table.gtasktable tr.glineitem.gselectedrow td,
+table.gcharttable tr.glineitem.gselectedrow td {
+  border-color: var(--jsgntt-selected-row-background-color);
+}
 
+table.gtasktable tr.glineitem td {
+  padding: 0.2em 0.3em;
+}
 /* highlight row (applied to row) */
 
-.gitemhighlight td {
+table.gtasktable tr.glineitem.gitemhighlight td,
+table.gcharttable tr.glineitem.gitemhighlight td {
   background-image: none;
   background-color: var(--jsgntt-hover-row-background-color);
+  border-color: var(--jsgntt-hover-row-background-color);
 }
 
 .gitemdifferent td {
@@ -363,7 +406,8 @@ span.gfoldercollapse {
 .gtaskgreen,
 .gtaskyellow,
 .gtaskpurple,
-.gtaskpink {
+.gtaskpink,
+.gtaskgray {
   height: 13px;
   filter: alpha(opacity=90);
   opacity: 0.9;
@@ -411,6 +455,10 @@ span.gfoldercollapse {
   background-color: #777777;
   margin-top: 2px;
   margin-bottom: 2px;
+}
+
+.gtaskgray {
+  background: rgb(128, 128, 128);
 }
 
 .gtaskblue {
@@ -467,6 +515,7 @@ span.gfoldercollapse {
   /* IE6-9 */
 }
 
+.gtaskgraycomplete,
 .gtaskbluecomplete,
 .gtaskredcomplete,
 .gtaskgreencomplete,
@@ -934,6 +983,12 @@ td.gspanning div {
     border-color: var(--jsgntt-main-text-color);
   }
 
+  .gtaskgray {
+    height: 0px;
+    border-top: 13px solid;
+    border-color: rgb(128, 128, 128);
+  }
+
   .gtaskblue {
     height: 0px;
     border-top: 13px solid;
@@ -970,6 +1025,7 @@ td.gspanning div {
     border-color: rgb(249, 177, 245);
   }
 
+  .gtaskgraycomplete,
   .gtaskbluecomplete,
   .gtaskredcomplete,
   .gtaskgreencomplete,

@@ -18,7 +18,7 @@ import { calculateCurrentDateOffset, getOffset, getScrollbarWidth, printChart } 
 import { createTaskInfo, AddTaskItem, AddTaskItemObject, RemoveTaskItem, processRows, ClearTasks } from "./task";
 
 import { getXMLProject, getXMLTask } from "./xml";
-import { COLUMN_ORDER, draw_header, draw_bottom, draw_task_headings } from "./draw_columns";
+import { COLUMN_ORDER, draw_header, draw_bottom, draw_task_heading_resize, draw_task_headings } from "./draw_columns"; // [XAM] Support resizable task list table header
 import { newNode, makeInput, getArrayLocationByID, CalcTaskXY, sLine, drawSelector } from "./utils/draw_utils";
 import { drawDependency, DrawDependencies } from "./draw_dependencies";
 import { includeGetSet } from "./options";
@@ -72,6 +72,8 @@ export const GanttChart = function (pDiv, pFormat) {
 
   this.vEventClickCollapse = null;
   this.vEventClickRow = null;
+  this.vEventDblClickRow = null; // [XAM] Support double click event handler
+  this.vEventContextMenuRow = null; // [XAM] Support context menu event handler
   this.vEvents = {
     taskname: null,
     res: null,
@@ -124,6 +126,7 @@ export const GanttChart = function (pDiv, pFormat) {
   this.vCaptionType;
   this.vDepId = 1;
   this.vTaskList = new Array();
+  this.vSelectedTaskList = new Array(); // [XAM] Supported row selection
   this.vFormatArr = new Array("hour", "day", "week", "month", "quarter");
   this.vMonthDaysArr = new Array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
   this.vProcessNeeded = true;
@@ -200,8 +203,10 @@ export const GanttChart = function (pDiv, pFormat) {
 
     vTmpRow = newNode(vTmpTBody, "tr", null, 'gtasktableheader'); // [XAM] Modified header style
     newNode(vTmpRow, "td", null, "gtasklist", "\u00A0");
-    newNode(vTmpRow, "td", null, "gtaskname", "\u00A0");
-
+    // [XAM]-S Support resizable task list table header
+    vTmpCell = newNode(vTmpRow, "td", null, "gtaskname", "\u00A0");
+    //draw_task_heading_resize(vTmpCell);
+    // [XAM]-E Support resizable task list table header
     this.getColumnOrder().forEach((column) => {
       if (this[column] == 1 || column === "vAdditionalHeaders") {
         draw_task_headings(column, vTmpRow, this.vLangs, this.vLang, this.vAdditionalHeaders, this.vEvents);
@@ -209,7 +214,34 @@ export const GanttChart = function (pDiv, pFormat) {
     });
     return gListLbl;
   };
-
+  // [XAM]-S Supported row selection
+  this.SelectTask = function(task) {
+    if (this.vSelectedTaskList.includes(task) === false) {
+      this.vSelectedTaskList.push(task);
+      const taskRow = task.getListChildRow();
+      const chartRow = task.getChildRow();
+      if (taskRow.classList.contains("gselectedrow") === false) {
+        taskRow.classList.add("gselectedrow");
+      }
+      if (chartRow.classList.contains("gselectedrow") === false) {
+        chartRow.classList.add("gselectedrow");
+      }
+    }
+  }
+  this.ClearSelectedTasks = function() {
+    for (let i = 0; i < this.vSelectedTaskList.length; i++) {
+      const taskRow = this.vSelectedTaskList[i].getListChildRow();
+      const chartRow = this.vSelectedTaskList[i].getChildRow();
+      if (taskRow.classList.contains("gselectedrow")) {
+        taskRow.classList.remove("gselectedrow");
+      }
+      if (chartRow.classList.contains("gselectedrow")) {
+        chartRow.classList.remove("gselectedrow");
+      }
+    }
+    this.vSelectedTaskList = new Array();
+  }
+  // [XAM]-E Supported row selection
   this.drawListBody = function (vLeftHeader) {
     let vTmpContentTabOuterWrapper = newNode(vLeftHeader, "div", null, "gtasktableouterwrapper");
     let vTmpContentTabWrapper = newNode(vTmpContentTabOuterWrapper, "div", null, "gtasktablewrapper");
@@ -238,23 +270,61 @@ export const GanttChart = function (pDiv, pFormat) {
         }
 
         const task = this.vTaskList[i];
-        const vEventClickRow = this.vEventClickRow;
-        const vEventClickCollapse = this.vEventClickCollapse;
+        // [XAM]-S Supported row selection
         addListener(
           "click",
-          function (e) {
+          (e) => {
             if (e.target.classList.contains("gfoldercollapse") === false) {
-              if (vEventClickRow && typeof vEventClickRow === "function") {
-                vEventClickRow(task);
+              this.ClearSelectedTasks();
+              this.SelectTask(task);
+              if (this.vEventClickRow && typeof this.vEventClickRow === "function") {
+                this.vEventClickRow(task);
               }
             } else {
-              if (vEventClickCollapse && typeof vEventClickCollapse === "function") {
-                vEventClickCollapse(task);
+              if (this.vEventClickCollapse && typeof this.vEventClickCollapse === "function") {
+                this.vEventClickCollapse(task);
               }
             }
           },
           vTmpRow
         );
+        // [XAM]-E Supported row selection
+        // [XAM]-S Support double click event handler
+        addListener(
+          "dblclick",
+          (e) => {
+            if (e.target.classList.contains("gfoldercollapse") === false) {
+              if (this.vEventDblClickRow && typeof this.vEventDblClickRow === "function") {
+                var args = {
+                  item: task,
+                  event: e
+                };
+                this.vEventDblClickRow(args);
+              }
+            }
+          },
+          vTmpRow
+        );
+        // [XAM]-E Support double click event handler
+        // [XAM]-S Support contextmenu event handler
+        addListener(
+          "contextmenu",
+          (e) => {
+            if (e.target.classList.contains("gfoldercollapse") === false) {
+              if (this.vEventContextMenuRow && typeof this.vEventContextMenuRow === "function") {
+                var args = {
+                  item: task,
+                  event: e,
+                  cancel: false
+                };
+                this.vEventContextMenuRow(args);
+                return !args.cancel;
+              }
+            }
+          },
+          vTmpRow
+        );
+        // [XAM]-E Support contextmenu event handler
 
         if (this.vTaskList[i].getGroup() == 1) {
           let vTmpDiv = newNode(vTmpCell, "div", null, null, vCellContents);

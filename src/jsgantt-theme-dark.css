@@ -10,5 +10,7 @@
     --jsgntt-selected-row-border-color: #2c6daa;
     --jsgntt-header-background-color: #393991;
     --jsgntt-header-background-color-hover: #5252c0;
-}
+    --jsgntt-cell-background-color: #222;
+    --jsgntt-cell-background-color-alt: #282828;
+  }
 }

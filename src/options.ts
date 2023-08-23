@@ -127,6 +127,8 @@ export const includeGetSet = function () {
   this.setEvents = function (pEvents) { this.vEvents = pEvents; };
   this.setEventsChange = function (pEventsChange) { this.vEventsChange = pEventsChange; };
   this.setEventClickRow = function (fn) { this.vEventClickRow = fn; };
+  this.setEventDblClickRow = function (fn) { this.vEventDblClickRow = fn; }; // [XAM] Support double click event handler
+  this.setEventContextMenuRow = function (fn) { this.vEventContextMenuRow = fn; }; // [XAM] Support context event handler
   this.setEventClickCollapse = function (fn) { this.vEventClickCollapse = fn; };
 
   this.setResources = function (resources) { this.vResources = resources; };
@@ -205,6 +207,8 @@ export const includeGetSet = function () {
   this.getEventsClickCell = function () { return this.vEvents; };
   this.getEventsChange = function () { return this.vEventsChange; };
   this.getEventClickRow = function () { return this.vEventClickRow; };
+  this.getEventDblClickRow = function () { return this.vEventDblClickRow; }; // [XAM] Support double click event handler
+  this.getEventContextMenuRow = function () { return this.vEventContextMenuRow; }; // [XAM] Support context menu event handler
   this.getEventClickCollapse = function () { return this.vEventClickCollapse; };
 
   this.getResources = function () { return this.vResources; };

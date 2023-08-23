@@ -102,6 +102,8 @@ function start(e) {
         cost: editValue,
       },
       vEventClickRow: console.log,
+      vEventDblClickRow: console.log,
+      vEventContextMenuRow: console.log,
       vEventClickCollapse: console.log,
 
       vResources: [

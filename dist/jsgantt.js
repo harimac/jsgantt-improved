@@ -15,7 +15,7 @@ var events_1 = require("./events");
 var general_utils_1 = require("./utils/general_utils");
 var task_1 = require("./task");
 var xml_1 = require("./xml");
-var draw_columns_1 = require("./draw_columns");
+var draw_columns_1 = require("./draw_columns"); // [XAM] Support resizable task list table header
 var draw_utils_1 = require("./utils/draw_utils");
 var draw_dependencies_1 = require("./draw_dependencies");
 var options_1 = require("./options");
@@ -66,6 +66,8 @@ exports.GanttChart = function (pDiv, pFormat) {
     };
     this.vEventClickCollapse = null;
     this.vEventClickRow = null;
+    this.vEventDblClickRow = null; // [XAM] Support double click event handler
+    this.vEventContextMenuRow = null; // [XAM] Support context menu event handler
     this.vEvents = {
         taskname: null,
         res: null,
@@ -118,6 +120,7 @@ exports.GanttChart = function (pDiv, pFormat) {
     this.vCaptionType;
     this.vDepId = 1;
     this.vTaskList = new Array();
+    this.vSelectedTaskList = new Array(); // [XAM] Supported row selection
     this.vFormatArr = new Array("hour", "day", "week", "month", "quarter");
     this.vMonthDaysArr = new Array(31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
     this.vProcessNeeded = true;
@@ -187,7 +190,10 @@ exports.GanttChart = function (pDiv, pFormat) {
         vTmpCell.appendChild(this.drawSelector("top"));
         vTmpRow = draw_utils_1.newNode(vTmpTBody, "tr", null, 'gtasktableheader'); // [XAM] Modified header style
         draw_utils_1.newNode(vTmpRow, "td", null, "gtasklist", "\u00A0");
-        draw_utils_1.newNode(vTmpRow, "td", null, "gtaskname", "\u00A0");
+        // [XAM]-S Support resizable task list table header
+        vTmpCell = draw_utils_1.newNode(vTmpRow, "td", null, "gtaskname", "\u00A0");
+        //draw_task_heading_resize(vTmpCell);
+        // [XAM]-E Support resizable task list table header
         this.getColumnOrder().forEach(function (column) {
             if (_this[column] == 1 || column === "vAdditionalHeaders") {
                 draw_columns_1.draw_task_headings(column, vTmpRow, _this.vLangs, _this.vLang, _this.vAdditionalHeaders, _this.vEvents);
@@ -195,6 +201,34 @@ exports.GanttChart = function (pDiv, pFormat) {
         });
         return gListLbl;
     };
+    // [XAM]-S Supported row selection
+    this.SelectTask = function (task) {
+        if (this.vSelectedTaskList.includes(task) === false) {
+            this.vSelectedTaskList.push(task);
+            var taskRow = task.getListChildRow();
+            var chartRow = task.getChildRow();
+            if (taskRow.classList.contains("gselectedrow") === false) {
+                taskRow.classList.add("gselectedrow");
+            }
+            if (chartRow.classList.contains("gselectedrow") === false) {
+                chartRow.classList.add("gselectedrow");
+            }
+        }
+    };
+    this.ClearSelectedTasks = function () {
+        for (var i = 0; i < this.vSelectedTaskList.length; i++) {
+            var taskRow = this.vSelectedTaskList[i].getListChildRow();
+            var chartRow = this.vSelectedTaskList[i].getChildRow();
+            if (taskRow.classList.contains("gselectedrow")) {
+                taskRow.classList.remove("gselectedrow");
+            }
+            if (chartRow.classList.contains("gselectedrow")) {
+                chartRow.classList.remove("gselectedrow");
+            }
+        }
+        this.vSelectedTaskList = new Array();
+    };
+    // [XAM]-E Supported row selection
     this.drawListBody = function (vLeftHeader) {
         var _this = this;
         var vTmpContentTabOuterWrapper = draw_utils_1.newNode(vLeftHeader, "div", null, "gtasktableouterwrapper");
@@ -225,20 +259,50 @@ exports.GanttChart = function (pDiv, pFormat) {
                     vCellContents += "\u00A0\u00A0\u00A0\u00A0";
                 }
                 var task_2 = this_1.vTaskList[i];
-                var vEventClickRow_1 = this_1.vEventClickRow;
-                var vEventClickCollapse_1 = this_1.vEventClickCollapse;
+                // [XAM]-S Supported row selection
                 events_1.addListener("click", function (e) {
                     if (e.target.classList.contains("gfoldercollapse") === false) {
-                        if (vEventClickRow_1 && typeof vEventClickRow_1 === "function") {
-                            vEventClickRow_1(task_2);
+                        _this.ClearSelectedTasks();
+                        _this.SelectTask(task_2);
+                        if (_this.vEventClickRow && typeof _this.vEventClickRow === "function") {
+                            _this.vEventClickRow(task_2);
                         }
                     }
                     else {
-                        if (vEventClickCollapse_1 && typeof vEventClickCollapse_1 === "function") {
-                            vEventClickCollapse_1(task_2);
+                        if (_this.vEventClickCollapse && typeof _this.vEventClickCollapse === "function") {
+                            _this.vEventClickCollapse(task_2);
                         }
                     }
                 }, vTmpRow_1);
+                // [XAM]-E Supported row selection
+                // [XAM]-S Support double click event handler
+                events_1.addListener("dblclick", function (e) {
+                    if (e.target.classList.contains("gfoldercollapse") === false) {
+                        if (_this.vEventDblClickRow && typeof _this.vEventDblClickRow === "function") {
+                            var args = {
+                                item: task_2,
+                                event: e
+                            };
+                            _this.vEventDblClickRow(args);
+                        }
+                    }
+                }, vTmpRow_1);
+                // [XAM]-E Support double click event handler
+                // [XAM]-S Support contextmenu event handler
+                events_1.addListener("contextmenu", function (e) {
+                    if (e.target.classList.contains("gfoldercollapse") === false) {
+                        if (_this.vEventContextMenuRow && typeof _this.vEventContextMenuRow === "function") {
+                            var args = {
+                                item: task_2,
+                                event: e,
+                                cancel: false
+                            };
+                            _this.vEventContextMenuRow(args);
+                            return !args.cancel;
+                        }
+                    }
+                }, vTmpRow_1);
+                // [XAM]-E Support contextmenu event handler
                 if (this_1.vTaskList[i].getGroup() == 1) {
                     var vTmpDiv = draw_utils_1.newNode(vTmpCell_1, "div", null, null, vCellContents);
                     var vTmpSpan = draw_utils_1.newNode(vTmpDiv, "span", this_1.vDivId + "group_" + vID, "gfoldercollapse", this_1.vTaskList[i].getOpen() == 1 ? "-" : "+");
@@ -484,11 +548,13 @@ exports.GanttChart = function (pDiv, pFormat) {
             var curTaskStart = this.vTaskList[i].getStart() ? this.vTaskList[i].getStart() : this.vTaskList[i].getPlanStart();
             var curTaskEnd = this.vTaskList[i].getEnd() ? this.vTaskList[i].getEnd() : this.vTaskList[i].getPlanEnd();
             var vTaskLeftPx_1 = general_utils_1.getOffset(vMinDate, curTaskStart, vColWidth, this.vFormat, this.vShowWeekends);
+            // [XAM]-S Enable force to set task range if its end is over max date.
             var vTaskRightPx = general_utils_1.getOffset(curTaskStart, curTaskEnd, vColWidth, this.vFormat, this.vShowWeekends);
             var vMaxRightPx = general_utils_1.getOffset(curTaskStart, vMaxDate, vColWidth, this.vFormat, this.vShowWeekends);
             if (this.vEnforceMinMaxDate === true) {
                 vTaskRightPx = Math.min(vTaskRightPx, vMaxRightPx);
             }
+            // [XAM]-E Enable force to set task range if its end is over max date.
             var curTaskPlanStart = void 0, curTaskPlanEnd = void 0;
             curTaskPlanStart = this.vTaskList[i].getPlanStart();
             curTaskPlanEnd = this.vTaskList[i].getPlanEnd();
@@ -497,10 +563,12 @@ exports.GanttChart = function (pDiv, pFormat) {
             if (curTaskPlanStart && curTaskPlanEnd) {
                 vTaskPlanLeftPx = general_utils_1.getOffset(vMinDate, curTaskPlanStart, vColWidth, this.vFormat, this.vShowWeekends);
                 vTaskPlanRightPx = general_utils_1.getOffset(curTaskPlanStart, curTaskPlanEnd, vColWidth, this.vFormat, this.vShowWeekends);
+                // [XAM]-S Enable force to set task range if its end is over max date.
                 var vMaxPlanRightPx = general_utils_1.getOffset(curTaskPlanStart, vMaxDate, vColWidth, this.vFormat, this.vShowWeekends);
                 if (this.vEnforceMinMaxDate === true) {
                     vTaskPlanRightPx = Math.min(vTaskPlanRightPx, vMaxPlanRightPx);
                 }
+                // [XAM]-E Enable force to set task range if its end is over max date.
             }
             var vID = this.vTaskList[i].getID();
             var vComb = this.vTaskList[i].getParItem() && this.vTaskList[i].getParItem().getGroup() == 2;
@@ -648,7 +716,7 @@ exports.GanttChart = function (pDiv, pFormat) {
                 events_1.addTooltipListeners(this, this.vTaskList[i].getPlanTaskDiv(), vTmpDiv2, callback);
             }
         }
-        // Render no data in the chart
+        // [XAM]-S Render the chart even if no data
         if (this.vTaskList.length == 0) {
             //let totalColumns = this.getColumnOrder().filter((column) => this[column] == 1 || column === "vAdditionalHeaders").length;
             //let vTmpRow = newNode(vTmpTBody, "tr", this.vDivId + "childrow_" + vID, "gmileitem gmile" + this.vFormat, null, null, null, this.vTaskList[i].getVisible() == 0 ? "none" : null);
@@ -659,6 +727,7 @@ exports.GanttChart = function (pDiv, pFormat) {
             draw_utils_1.newNode(vOutput, "div", null, "gtasknolist-label", "<span>&nbsp;</span>");
             vTmpCell.appendChild(vOutput);
         }
+        // [XAM]-E Render the chart even if no data
         // Include the footer with the days/week/month...
         if (vSingleCell) {
             var vTmpTFootTRow = draw_utils_1.newNode(vTmpTFoot, "tr");
@@ -862,10 +931,10 @@ exports.GanttChart = function (pDiv, pFormat) {
 },{"./draw_columns":3,"./draw_dependencies":4,"./events":5,"./lang":8,"./options":9,"./task":10,"./utils/date_utils":11,"./utils/draw_utils":12,"./utils/general_utils":13,"./xml":14}],3:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.draw_task_headings = exports.draw_bottom = exports.draw_header = exports.COLUMN_ORDER = void 0;
+exports.draw_task_headings = exports.draw_task_heading_resize = exports.draw_bottom = exports.draw_header = exports.COLUMN_ORDER = void 0;
 var date_utils_1 = require("./utils/date_utils");
 var task_1 = require("./task");
-var events_1 = require("./events");
+var events_1 = require("./events"); // [XAM] Support resizable task list table header
 var draw_utils_1 = require("./utils/draw_utils");
 exports.COLUMN_ORDER = [
     'vShowRes',
@@ -890,6 +959,19 @@ var COLUMNS_TYPES = {
     'vShowCost': 'cost',
     'vShowAddEntries': 'addentries'
 };
+// [XAM]-S Support resizable task list table header
+var COLUMNS_WIDTHS = {
+    'vShowRes': 70,
+    'vShowDur': 70,
+    'vShowComp': 70,
+    'vShowStartDate': 105,
+    'vShowEndDate': 105,
+    'vShowPlanStartDate': 105,
+    'vShowPlanEndDate': 105,
+    'vShowCost': 70,
+    'vShowAddEntries': 70
+};
+// [XAM]-E Support resizable task list table header
 exports.draw_header = function (column, i, vTmpRow, vTaskList, vEditable, vEventsChange, vEvents, vDateTaskTableDisplayFormat, vAdditionalHeaders, vFormat, vLangs, vLang, vResources, Draw) {
     var vTmpCell, vTmpDiv;
     if ('vShowRes' === column) {
@@ -1012,6 +1094,49 @@ exports.draw_bottom = function (column, vTmpRow, vAdditionalHeaders) {
 //     addListenerClickCell(nodeCreated, vEvents, { hader: true, column }, type);
 //   }
 // }
+// [XAM]-S Support resizable task list table header
+exports.draw_task_heading_resize = function (vTmpCell) {
+    var resizer = draw_utils_1.newNode(vTmpCell, 'span', null, 'header-resize');
+    var dragStartPosition = 0;
+    var columnStartingWidth = 0;
+    var isDragging = false;
+    var onMove = function (e) {
+        if (isDragging === true) {
+            var newWidth = columnStartingWidth + (e.clientX - dragStartPosition);
+            vTmpCell.style.width = newWidth + "px";
+            /*var fieldIndex = $.inArray($th.get(0).jsGridField, this.fields);
+            var childIndex = $th.parent().children().index($th);
+            this._contentHeader.find('tr > th:eq('+childIndex+')').css("width", newWidth);
+            var beforeHight = this._summary.outerHeight(true);
+            this._summaryGrid.find('tr > th:eq('+childIndex+')').css("width", newWidth);
+            if (beforeHight !== this._summary.outerHeight(true))
+                this._refreshHeight();
+            this.fields[fieldIndex].width = newWidth;*/
+        }
+    };
+    var onDragEnd = function (e) {
+        if (isDragging === true) {
+            //var childIndex = $.inArray($th.get(0).jsGridField, this.fields);
+            //var childIndex = $th.parent().children().index($th);
+            document.removeEventListener("mousemove", onMove);
+            document.removeEventListener("mouseup", onDragEnd);
+            /*var eventArgs2 = {
+              columnName: this.fields[childIndex].name,
+              value: this.fields[childIndex].width
+            }
+            this._callEventHandler(this.onFieldWidthChanged, eventArgs2);*/
+            isDragging = false;
+        }
+    };
+    events_1.addListener('mousedown', function (e) {
+        dragStartPosition = e.clientX;
+        columnStartingWidth = parseInt(vTmpCell.offsetWidth);
+        document.addEventListener("mousemove", onMove);
+        document.addEventListener("mouseup", onDragEnd);
+        isDragging = true;
+    }, resizer);
+};
+// [XAM]-E Support resizable task list table header
 exports.draw_task_headings = function (column, vTmpRow, vLangs, vLang, vAdditionalHeaders, vEvents) {
     var nodeCreated;
     if ('vAdditionalHeaders' === column && vAdditionalHeaders) {
@@ -1020,12 +1145,14 @@ exports.draw_task_headings = function (column, vTmpRow, vLangs, vLang, vAddition
             var text = header.translate ? vLangs[vLang][header.translate] : header.title;
             var css = header.class ? header.class : "gadditional-" + key;
             nodeCreated = draw_utils_1.newNode(vTmpRow, 'td', null, "gtaskheading gadditional " + css, text);
+            //draw_task_heading_resize(nodeCreated); // [XAM] Support resizable task list table header
         }
     }
     else {
         var type = COLUMNS_TYPES[column];
         nodeCreated = draw_utils_1.newNode(vTmpRow, 'td', null, "gtaskheading g" + type, vLangs[vLang][type]);
         events_1.addListenerClickCell(nodeCreated, vEvents, { hader: true, column: column }, type);
+        //draw_task_heading_resize(nodeCreated); // [XAM] Support resizable task list table header
     }
 };
 
@@ -3567,6 +3694,8 @@ exports.includeGetSet = function () {
     this.setEvents = function (pEvents) { this.vEvents = pEvents; };
     this.setEventsChange = function (pEventsChange) { this.vEventsChange = pEventsChange; };
     this.setEventClickRow = function (fn) { this.vEventClickRow = fn; };
+    this.setEventDblClickRow = function (fn) { this.vEventDblClickRow = fn; }; // [XAM] Support double click event handler
+    this.setEventContextMenuRow = function (fn) { this.vEventContextMenuRow = fn; }; // [XAM] Support context event handler
     this.setEventClickCollapse = function (fn) { this.vEventClickCollapse = fn; };
     this.setResources = function (resources) { this.vResources = resources; };
     this.setAdditionalHeaders = function (headers) { this.vAdditionalHeaders = headers; };
@@ -3641,6 +3770,8 @@ exports.includeGetSet = function () {
     this.getEventsClickCell = function () { return this.vEvents; };
     this.getEventsChange = function () { return this.vEventsChange; };
     this.getEventClickRow = function () { return this.vEventClickRow; };
+    this.getEventDblClickRow = function () { return this.vEventDblClickRow; }; // [XAM] Support double click event handler
+    this.getEventContextMenuRow = function () { return this.vEventContextMenuRow; }; // [XAM] Support context menu event handler
     this.getEventClickCollapse = function () { return this.vEventClickCollapse; };
     this.getResources = function () { return this.vResources; };
     this.getAdditionalHeaders = function () { return this.vAdditionalHeaders; };

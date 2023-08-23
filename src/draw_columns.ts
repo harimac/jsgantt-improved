@@ -1,6 +1,6 @@
 import { formatDateStr } from './utils/date_utils';
 import { AddTaskItemObject } from './task';
-import { addListenerInputCell, addListenerClickCell } from './events';
+import { addListener, addListenerInputCell, addListenerClickCell } from './events'; // [XAM] Support resizable task list table header
 import { newNode, makeInput } from './utils/draw_utils';
 
 export const COLUMN_ORDER = [
@@ -27,6 +27,20 @@ const COLUMNS_TYPES = {
   'vShowCost': 'cost',
   'vShowAddEntries': 'addentries'
 }
+
+// [XAM]-S Support resizable task list table header
+const COLUMNS_WIDTHS = {
+  'vShowRes': 70,
+  'vShowDur': 70,
+  'vShowComp': 70,
+  'vShowStartDate': 105,
+  'vShowEndDate': 105,
+  'vShowPlanStartDate': 105,
+  'vShowPlanEndDate': 105,
+  'vShowCost': 70,
+  'vShowAddEntries': 70
+}
+// [XAM]-E Support resizable task list table header
 
 export const draw_header = function (column, i, vTmpRow, vTaskList, vEditable, vEventsChange, vEvents,
   vDateTaskTableDisplayFormat, vAdditionalHeaders, vFormat, vLangs, vLang, vResources, Draw) {
@@ -157,6 +171,51 @@ export const draw_bottom = function (column, vTmpRow, vAdditionalHeaders) {
 //   }
 // }
 
+// [XAM]-S Support resizable task list table header
+export const draw_task_heading_resize = function(vTmpCell) {
+  const resizer = newNode(vTmpCell, 'span', null, 'header-resize');
+  var dragStartPosition = 0;
+  var columnStartingWidth = 0;
+  var isDragging = false;
+  var onMove = function (e) {
+    if (isDragging === true) {
+      var newWidth = columnStartingWidth + (e.clientX - dragStartPosition);
+      vTmpCell.style.width = `${newWidth}px`;
+      /*var fieldIndex = $.inArray($th.get(0).jsGridField, this.fields);
+      var childIndex = $th.parent().children().index($th);
+      this._contentHeader.find('tr > th:eq('+childIndex+')').css("width", newWidth);
+      var beforeHight = this._summary.outerHeight(true);
+      this._summaryGrid.find('tr > th:eq('+childIndex+')').css("width", newWidth);
+      if (beforeHight !== this._summary.outerHeight(true))
+          this._refreshHeight();
+      this.fields[fieldIndex].width = newWidth;*/
+    }
+  };
+
+  var onDragEnd = function (e) {
+    if (isDragging === true) {
+      //var childIndex = $.inArray($th.get(0).jsGridField, this.fields);
+      //var childIndex = $th.parent().children().index($th);
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onDragEnd);
+      /*var eventArgs2 = {
+        columnName: this.fields[childIndex].name,
+        value: this.fields[childIndex].width
+      }
+      this._callEventHandler(this.onFieldWidthChanged, eventArgs2);*/
+      isDragging = false;
+    }
+  };
+  addListener('mousedown', function(e) {
+    dragStartPosition = e.clientX;
+    columnStartingWidth = parseInt(vTmpCell.offsetWidth);
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onDragEnd);
+    isDragging = true;
+  }, resizer);
+}
+// [XAM]-E Support resizable task list table header
+
 export const draw_task_headings = function (column, vTmpRow, vLangs, vLang, vAdditionalHeaders, vEvents) {
   let nodeCreated;
   if ('vAdditionalHeaders' === column && vAdditionalHeaders) {
@@ -165,11 +224,13 @@ export const draw_task_headings = function (column, vTmpRow, vLangs, vLang, vAdd
       const text = header.translate ? vLangs[vLang][header.translate] : header.title;
       const css = header.class ? header.class : `gadditional-${key}`;
       nodeCreated = newNode(vTmpRow, 'td', null, `gtaskheading gadditional ${css}`, text);
+      //draw_task_heading_resize(nodeCreated); // [XAM] Support resizable task list table header
     }
   }
   else {
     const type = COLUMNS_TYPES[column];
     nodeCreated = newNode(vTmpRow, 'td', null, `gtaskheading g${type}`, vLangs[vLang][type]);
     addListenerClickCell(nodeCreated, vEvents, { hader: true, column }, type);
+    //draw_task_heading_resize(nodeCreated); // [XAM] Support resizable task list table header
   }
 }
