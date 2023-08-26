@@ -337,9 +337,17 @@ exports.GanttChart = function (pDiv, pFormat) {
         for (var i = 0; i < this.vTaskList.length; i++) {
             _loop_1(i);
         }
-        // Render no daa in the chart
+        // Render no data in the chart
         if (this.vTaskList.length == 0) {
-            var totalColumns = this.getColumnOrder().filter(function (column) { return _this[column] == 1 || column === "vAdditionalHeaders"; }).length;
+            var totalColumns = this.getColumnOrder().reduce(function (prev, column) {
+                if (_this[column] == 1) {
+                    prev += 1;
+                }
+                else if (column === "vAdditionalHeaders") {
+                    prev += Object.keys(_this.vAdditionalHeaders).length;
+                }
+                return prev;
+            }, 2);
             var vTmpRow_2 = draw_utils_1.newNode(vTmpContentTBody, "tr", this.vDivId + "child_", "gname ");
             // this.vTaskList[i].setListChildRow(vTmpRow);
             var vTmpCell_2 = draw_utils_1.newNode(vTmpRow_2, "td", null, "gtasknolist", "", null, null, null, totalColumns);

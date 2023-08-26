@@ -374,9 +374,17 @@ export const GanttChart = function (pDiv, pFormat) {
       }
     }
 
-    // Render no daa in the chart
+    // Render no data in the chart
     if (this.vTaskList.length == 0) {
-      let totalColumns = this.getColumnOrder().filter((column) => this[column] == 1 || column === "vAdditionalHeaders").length;
+      let totalColumns = this.getColumnOrder().reduce((prev, column) => {
+        if (this[column] == 1) {
+          prev += 1;
+        }
+        else if (column === "vAdditionalHeaders") {
+          prev += Object.keys(this.vAdditionalHeaders).length;
+        }
+        return prev;
+      }, 2);
       let vTmpRow = newNode(vTmpContentTBody, "tr", this.vDivId + "child_", "gname ");
       // this.vTaskList[i].setListChildRow(vTmpRow);
       let vTmpCell = newNode(vTmpRow, "td", null, "gtasknolist", "", null, null, null, totalColumns);

@@ -9,15 +9,15 @@
   --jsgntt-main-text-color: #000;
   --jsgntt-main-background-color: #fff;
   --jsgntt-main-alter-background-color: #f7f7f7;
-  --jsgntt-main-border-color: #efefef;
+  --jsgntt-main-border-color: #aaa;
   --jsgntt-hover-row-background-color: #c4e2ff;
-  --jsgntt-hover-row-border-color: #c4e2ff;
+  --jsgntt-hover-row-border-color: #64b4ff;
   --jsgntt-selected-row-background-color: #6eb8ff;
-  --jsgntt-selected-row-border-color: #6eb8ff;
-  --jsgntt-header-background-color: #f9f9f9;
-  --jsgntt-header-background-color-hover: #fcfcfc;
+  --jsgntt-selected-row-border-color: #48a7ff;
+  --jsgntt-header-background-color: #ddd;
+  --jsgntt-header-background-color-hover: #f0f0f0;
   --jsgntt-cell-background-color: #fff;
-  --jsgntt-cell-background-color-alt: #fcfcfc;
+  --jsgntt-cell-background-color-alt: #f4f4f4;
 }
 
 div.gantt {
@@ -49,7 +49,7 @@ div.gantt {
 .gtaskcellwkend {
   height: 20px;
   /* font-size: 12px; */
-  border: var(--jsgntt-main-border-color) 1px solid;
+  border-right: var(--jsgntt-main-border-color) 1px solid;
   text-align: center;
   cursor: default;
 }
@@ -65,7 +65,7 @@ div.gantt {
   min-width: 5px;
   max-width: 5px;
   width: 5px;
-  border: var(--jsgntt-main-border-color) 1px solid;
+  /* border: var(--jsgntt-main-border-color) 1px solid; */
   border-right: none;
 }
 
@@ -168,7 +168,7 @@ td.gspanning {
 .genddate {
   height: 18px;
   white-space: nowrap;
-  border: var(--jsgntt-main-border-color) 1px solid;
+  border-right: var(--jsgntt-main-border-color) 1px solid;
 }
 
 .gtaskheading div,
@@ -193,7 +193,7 @@ td.gspanning {
   opacity: 0.3;
   background: var(--jsgntt-main-background-color);
   z-index: 10000;
-  border: 1px solid var(--jsgntt-main-text-color);
+  /* border: 1px solid var(--jsgntt-main-text-color); */
 }
 
 /* Additional values for some task list elements */
@@ -250,7 +250,7 @@ td.gspanning {
   position: relative;
   top: 0px;
   cursor: pointer;
-  border: var(--jsgntt-main-background-color) 1px solid;
+  /* border: var(--jsgntt-main-background-color) 1px solid; */
   margin-left: 2px;
   padding-left: 2px;
   padding-right: 2px;
@@ -259,7 +259,7 @@ td.gspanning {
 span.gformlabel:hover,
 span.gselected {
   background-color: var(--jsgntt-selected-row-background-color);
-  border: var(--jsgntt-selected-row-border-color) 1px solid;
+  /* border: var(--jsgntt-selected-row-border-color) 1px solid; */
 }
 
 span.gfoldercollapse {
@@ -272,24 +272,34 @@ span.gfoldercollapse {
 
 .gtasktableh,
 .gtasktable {
-  border-right: var(--jsgntt-main-border-color) 1px solid;
+  border: var(--jsgntt-main-border-color) 1px solid;
   width: 100%;
 }
 
-.gcharttableh,
+/* .gcharttableh,
 .gtasktableh,
 .gtasktable,
 .gcharttable {
   border-collapse: collapse;
-}
+} */
 
 .gcharttable,
 .gcharttableh {
+  border: var(--jsgntt-main-border-color) 1px solid;
+  border-left: none;
   table-layout: fixed;
 }
 
+.gtasktable,
 .gcharttable {
-  border: var(--jsgntt-main-border-color) 1px solid;
+  border-top: none;
+  /* border: var(--jsgntt-main-border-color) 1px solid; */
+}
+
+.gtasktableheader,
+.gcharttableheader {
+  border-bottom: var(--jsgntt-main-border-color) 1px solid;
+  pointer-events: none;
 }
 
 /* for some reason firefox needs this */
@@ -304,16 +314,17 @@ span.gfoldercollapse {
 .gmileitem,
 .glineitem {
   background-color: var(--jsgntt-main-background-color);
+  border-bottom: var(--jsgntt-main-border-color) 1px solid;
 }
 table.gtasktable tr.glineitem.gselectedrow,
 table.gcharttable tr.glineitem.gselectedrow {
   background-color: var(--jsgntt-selected-row-background-color);
   border-color: var(--jsgntt-selected-row-border-color);
 }
-table.gtasktable tr.glineitem.gselectedrow td,
+/* table.gtasktable tr.glineitem.gselectedrow td,
 table.gcharttable tr.glineitem.gselectedrow td {
   border-color: var(--jsgntt-selected-row-background-color);
-}
+} */
 
 table.gtasktable tr.glineitem td {
   padding: 0.2em 0.3em;
@@ -324,7 +335,15 @@ table.gtasktable tr.glineitem.gitemhighlight td,
 table.gcharttable tr.glineitem.gitemhighlight td {
   background-image: none;
   background-color: var(--jsgntt-hover-row-background-color);
-  border-color: var(--jsgntt-hover-row-background-color);
+  /* border-color: var(--jsgntt-hover-row-background-color); */
+  border-top-color: var(--jsgntt-hover-row-border-color);
+  border-bottom-color: var(--jsgntt-hover-row-border-color);
+}
+table.gtasktable tr.glineitem.gitemhighlight td:first-child {
+  border-left-color: var(--jsgntt-hover-row-border-color);
+}
+table.gcharttable tr.glineitem.gitemhighlight td:last-child {
+  border-right-color: var(--jsgntt-hover-row-border-color);
 }
 
 .gitemdifferent td {
@@ -853,7 +872,7 @@ td.gspanning div {
 }
 
 .gadditional {
-  border: var(--jsgntt-main-border-color) 1px solid;
+  border-right: var(--jsgntt-main-border-color) 1px solid;
 }
 
 .gadditional,
